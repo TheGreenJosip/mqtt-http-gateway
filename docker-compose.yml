@@ -1,0 +1,27 @@
+version: "3.8" # Specify the Docker Compose file format version
+
+services:
+  # Node.js application service
+  nodejs:
+    build:
+      context: . # Use the current directory as the build context
+      dockerfile: Dockerfile # Specify the Dockerfile to use for building the image
+    container_name: nodejs-app # Name the container for easier identification
+    environment:
+      - PORT=3000 # Set the application port via environment variable
+    expose:
+      - 3000 # Expose the internal port for inter-service communication (not published to the host)
+
+  # Nginx reverse proxy service
+  nginx:
+    build:
+      context: ./nginx # Use the `nginx` directory as the build context
+      dockerfile: Dockerfile # Specify the Dockerfile to use for building the Nginx image
+    container_name: nginx-proxy # Name the container for easier identification
+    ports:
+      - "80:80" # Map port 80 on the host to port 80 in the container (HTTP)
+      - "443:443" # Map port 443 on the host to port 443 in the container (HTTPS)
+    depends_on:
+      - nodejs # Ensure the Node.js service starts before Nginx
+    volumes:
+      - ./nginx/certs:/etc/nginx/certs # Mount the certs directory
